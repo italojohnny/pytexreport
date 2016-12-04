@@ -1,34 +1,18 @@
 #!/usr/python3.5
-import psycopg2
-import psycopg2.extras
 import re
+from modules import interfaceDB
 
 class pytex_report (object):
     def __init__ (self, sql):
-        self.ip      = '192.168.1.104'
-        self.banco   = 'bancodedados'
-        self.usuario = 'admteste'
-        self.senha   = 'yma2578k'
-        self.porta   = '5432'
-        self.conexao = psycopg2.connect(database=self.banco, user=self.usuario, password=self.senha, host=self.ip, port=self.porta)
-
-        self.resultado = self.exec_query(sql)
+        self.resultado = interfaceDB.easyDBInterface(sql)
+        self.tamanho = 0
+        self.tabela = "no results"
         if self.resultado:
-            self.tamanho = len(self.resultado[0])
-            self.keys = [x for x in self.resultado[0].keys()]
-        else:
-            self.tamanho = 0
-            self.keys = []
-        self.iterador = self.iterador_registro()
-        self.tabela = self.relatorio()
+            self.tamanho = len(self.resultado['keys'])
 
-    def __del__ (self):
-        self.conexao.close()
-
-    def exec_query (self, query):
-        cursor = self.conexao.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-        cursor.execute(query)
-        return cursor.fetchall()
+        if self.tamanho > 0:
+            self.iterador = self.iterador_registro()
+            self.tabela = self.relatorio()
 
     def iterador_registro (self):
         texto = "%s"
@@ -38,25 +22,25 @@ class pytex_report (object):
         return texto
 
     def trata_texto_tex (self, texto):
-        return re.sub(r"(_)", r"\\\1", texto)
+        return re.sub(r"(_|$)", r"\\\1", texto) # adicionar outras excessoes
 
     def relatorio (self):
-        tabela = r"\begin{longtable}{ *%s{p{0.24\textwidth}} }" % self.tamanho
+        tabela = r"\begin{longtable}{ *%s{p{0.2\textwidth}} }" % self.tamanho
 
         tabela+="\n"
-        tabela+= self.iterador % tuple([self.trata_texto_tex(x) for x in self.keys])
+        tabela+= self.iterador % tuple([self.trata_texto_tex(x) for x in self.resultado['keys']])
         tabela+="\n\\endhead"
 
-        for i in self.resultado:
+        for i in self.resultado['values']:
             tabela+="\n"
-            tabela+= self.iterador % tuple([self.trata_texto_tex(str(i[x])) for x in self.keys])
+            tabela+= self.iterador % tuple([self.trata_texto_tex(str(i[x])) for x in self.resultado['keys']])
 
         tabela+= "\n"
         tabela+= r"\end{longtable}"
         return tabela
 
 def main ():
-    print(pytex_report("select * from tabela1").tabela)
+    print(pytex_report("select * from actor").tabela)
 
 if __name__ == "__main__": main()
 
