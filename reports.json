@@ -1,0 +1,12 @@
+{
+	"reports": [
+		{
+			"name":"relatorio1",
+			"variables": [
+				
+			],
+			"query": "select * from actor"
+		}
+	
+	]
+}

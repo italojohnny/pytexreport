@@ -108,7 +108,7 @@ class dbiMysql (DBInterface):# {{{
 
     def standardize (self, rows):
         print('padronizando %s' % rows)
-        return {}
+        return {"keys":[], "values":[]}
 # }}}
 
 def load_config ():# {{{

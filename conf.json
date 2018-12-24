@@ -2,7 +2,7 @@
 	"password": "yma2578k", 
 	"port": "5432", 
 	"database": "bancodedados", 
-	"dbms": "postgresql", 
+	"dbms": "mysql",
 	"host": "192.168.1.104", 
 	"user": "admteste"
 }
